@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario</title>
+    <style>
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url('ImagenFondoNoSQL.jpg'); /* Cambia 'fondo.jpg' por tu imagen */
+            background-size: cover; /* La imagen cubrirá toda la pantalla */
+            background-repeat: no-repeat; /* Evita que la imagen se repita */
+            background-position: center center; /* Centra la imagen */
+            color: #333;
+        }
+
+        /* Encabezado */
+        h1 {
+            text-align: center;
+            color: white; /* Texto blanco para contrastar */
+            text-shadow: 2px 2px 5px black; /* Sombra para mejor visibilidad */
+        }
+
+        /* Contenedores de formularios y reportes */
+        form, .reports {
+            background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semi-transparente */
+            padding: 20px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+            max-width: 500px;
+        }
+
+        /* Etiquetas y campos de entrada */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Salida de datos */
+        pre {
+            background-color: #eef;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Gestión de Inventario</h1>
+
+    <!-- Formulario para agregar productos -->
+    <form id="addProductForm">
+        <h2>Agregar Producto</h2>
+        <label for="productName">Nombre del Producto:</label>
+        <input type="text" id="productName" placeholder="Ej. Laptop Dell" required>
+
+        <label for="productCategory">Categoría:</label>
+        <input type="text" id="productCategory" placeholder="Ej. Electrónicos" required>
+
+        <label for="productStock">Cantidad:</label>
+        <input type="number" id="productStock" placeholder="Ej. 10" required>
+
+        <button type="submit">Guardar Producto</button>
+    </form>
+
+    <!-- Sección para ver reportes -->
+    <div class="reports">
+        <h2>Reportes</h2>
+        <button onclick="fetchInventory()">Ver Inventario</button>
+        <pre id="inventoryOutput">Aquí se mostrará el inventario...</pre>
+    </div>
+
+    <script>
+        // Función para enviar producto al backend
+        document.getElementById("addProductForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById("productName").value;
+            const category = document.getElementById("productCategory").value;
+            const stock = document.getElementById("productStock").value;
+
+            try {
+                const response = await fetch("http://localhost:5000/api/products", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: name,
+                        category: category,
+                        stock: parseInt(stock)
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Producto agregado correctamente.");
+                    document.getElementById("addProductForm").reset();
+                } else {
+                    alert("Error al agregar el producto.");
+                }
+            } catch (error) {
+                console.error("Error al conectar con el backend:", error);
+                alert("No se pudo conectar con el servidor.");
+            }
+        });
+
+        // Función para obtener el inventario del backend
+        async function fetchInventory() {
+            try {
+                const response = await fetch("http://localhost:5000/api/reports/inventory");
+                const data = await response.json();
+
+                document.getElementById("inventoryOutput").innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error("Error al obtener el inventario:", error);
+                alert("No se pudo conectar con el servidor.");
+            }
+        }
+    </script>
+</body>
+</html>
