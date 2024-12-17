@@ -4,19 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario</title>
+    <!-- Fuente decorativa antigua desde Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Fondo y estilo general */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             background-image: url('ImagenFondoNoSQL.jpg');
             background-size: cover;
+            background-repeat: no-repeat;
             background-position: center;
             color: #333;
         }
 
+        /* Estilo del título con botones dentro */
         .titulo {
             text-align: center;
             font-family: 'Cinzel', serif;
@@ -27,7 +32,10 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             font-size: 32px;
+            letter-spacing: 2px;
+            font-weight: bold;
             max-width: 600px;
+            position: relative;
         }
 
         .botones-titulo {
@@ -37,7 +45,7 @@
             gap: 10px;
         }
 
-        .button {
+        .botones-titulo .button {
             background-color: #8B5E3C;
             color: white;
             font-size: 16px;
@@ -47,18 +55,23 @@
             border-radius: 5px;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .button i {
+        .botones-titulo .button i {
             margin-right: 8px;
         }
 
-        .button:hover {
+        .botones-titulo .button:hover {
             background-color: #6A452E;
         }
 
+        /* Formulario */
         form {
             display: none;
+            margin-top: 20px;
             background-color: rgba(255, 255, 255, 0.95);
             padding: 20px;
             border-radius: 8px;
@@ -69,8 +82,8 @@
 
         label {
             display: block;
-            font-weight: bold;
             margin-bottom: 8px;
+            font-weight: bold;
         }
 
         input, select, button {
@@ -79,17 +92,44 @@
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        table {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #8B5E3C;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <!-- Título con botones -->
+    <!-- Título con botones incluidos -->
     <div class="titulo">
         GESTIÓN DE INVENTARIO
         <div class="botones-titulo">
-            <button id="addProductBtn" class="button"><i class="fas fa-plus"></i> Agregar Nuevo Producto</button>
-            <button id="stockReportBtn" class="button"><i class="fas fa-search"></i> Obtener Reporte de Stock</button>
-            <button id="createStockBtn" class="button"><i class="fas fa-box"></i> Crear Stock</button>
+            <button id="addProductBtn" class="button">
+                <i class="fas fa-plus"></i> Agregar Nuevo Producto
+            </button>
+            <button id="stockReportBtn" class="button">
+                <i class="fas fa-search"></i> Obtener Reporte de Stock
+            </button>
+            <button id="createStockBtn" class="button">
+                <i class="fas fa-warehouse"></i> Crear Stock
+            </button>
         </div>
     </div>
 
@@ -120,18 +160,22 @@
             <option value="">Cargando proveedores...</option>
         </select>
 
-        <button type="submit" class="button"><i class="fas fa-paper-plane"></i> Enviar Producto</button>
+        <button type="submit" class="button">
+            <i class="fas fa-paper-plane"></i> Enviar Producto
+        </button>
     </form>
 
     <!-- Formulario para obtener el reporte de stock -->
     <form id="stockForm">
         <label for="storeId">ID de la Tienda:</label>
         <input type="text" id="storeId" placeholder="Ej. 6743a921408b0f4a5d90df16" required>
-        <button type="submit" class="button"><i class="fas fa-search"></i> Obtener Reporte</button>
+        <button type="submit" class="button">
+            <i class="fas fa-search"></i> Obtener Reporte
+        </button>
     </form>
 
     <!-- Formulario para crear stock -->
-    <form id="createStockForm">
+    <form id="createStockForm" style="display: none;">
         <label for="producto">Producto:</label>
         <select id="producto" required>
             <option value="">Cargando productos...</option>
@@ -143,7 +187,7 @@
         </select>
 
         <label for="cantidad">Cantidad en Stock:</label>
-        <input type="number" id="cantidad" required>
+        <input type="number" id="cantidad" placeholder="Ej. 50" required>
 
         <label for="fecha_llegada">Fecha de Llegada:</label>
         <input type="datetime-local" id="fecha_llegada" required>
@@ -152,87 +196,107 @@
         <input type="datetime-local" id="fecha_actualizacion" required>
 
         <label for="nivel_alerta">Nivel de Alerta de Reposición:</label>
-        <input type="number" id="nivel_alerta" required>
+        <input type="number" id="nivel_alerta" placeholder="Ej. 10" required>
 
-        <button type="submit" class="button"><i class="fas fa-paper-plane"></i> Crear Stock</button>
+        <button type="submit" class="button">
+            <i class="fas fa-paper-plane"></i> Crear Stock
+        </button>
     </form>
 
     <script>
+        // Selección de botones y formularios
         const addProductBtn = document.getElementById("addProductBtn");
         const stockReportBtn = document.getElementById("stockReportBtn");
         const createStockBtn = document.getElementById("createStockBtn");
+    
         const productForm = document.getElementById("productForm");
         const stockForm = document.getElementById("stockForm");
         const createStockForm = document.getElementById("createStockForm");
-
-        // Mostrar formularios alternativos
+    
+        const productoSelect = document.getElementById("producto");
+        const tiendaSelect = document.getElementById("tienda");
+    
+        // Mostrar formulario para agregar productos
         addProductBtn.addEventListener("click", () => {
             productForm.style.display = "block";
             stockForm.style.display = "none";
             createStockForm.style.display = "none";
         });
-
+    
+        // Mostrar formulario para reporte de stock
         stockReportBtn.addEventListener("click", () => {
-            productForm.style.display = "none";
             stockForm.style.display = "block";
+            productForm.style.display = "none";
             createStockForm.style.display = "none";
         });
-
+    
+        // Mostrar formulario para crear stock
         createStockBtn.addEventListener("click", () => {
+            createStockForm.style.display = "block";
             productForm.style.display = "none";
             stockForm.style.display = "none";
-            createStockForm.style.display = "block";
             cargarProductos();
             cargarTiendas();
         });
-
-        // Cargar productos
+    
+        // Obtener lista de productos
         async function cargarProductos() {
             const response = await fetch("http://localhost:5000/api/products");
             const productos = await response.json();
-            const productoSelect = document.getElementById("producto");
-            productoSelect.innerHTML = '<option value="">Seleccione un producto</option>';
-            productos.forEach(p => {
-                productoSelect.innerHTML += `<option value="${p._id}">${p.nombre}</option>`;
+            productoSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
+            productos.forEach(producto => {
+                const option = document.createElement("option");
+                option.value = producto._id;
+                option.textContent = producto.nombre;
+                productoSelect.appendChild(option);
             });
         }
-
-        // Cargar tiendas
+    
+        // Obtener lista de tiendas
         async function cargarTiendas() {
             const response = await fetch("http://localhost:5000/api/stores");
             const tiendas = await response.json();
-            const tiendaSelect = document.getElementById("tienda");
-            tiendaSelect.innerHTML = '<option value="">Seleccione una tienda</option>';
-            tiendas.forEach(t => {
-                tiendaSelect.innerHTML += `<option value="${t._id}">${t.nombre || t.nombre_tienda}</option>`;
+            tiendaSelect.innerHTML = '<option value="">Seleccionar tienda...</option>';
+            tiendas.forEach(tienda => {
+                const option = document.createElement("option");
+                option.value = tienda._id;
+                option.textContent = tienda.nombre || tienda.nombre_tienda;
+                tiendaSelect.appendChild(option);
             });
         }
-
+    
         // Enviar formulario para crear stock
         createStockForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const stockData = {
-                producto: document.getElementById("producto").value,
-                tienda: document.getElementById("tienda").value,
+                producto: productoSelect.value,
+                tienda: tiendaSelect.value,
                 cantidad_en_stock: document.getElementById("cantidad").value,
                 fecha_llegada: document.getElementById("fecha_llegada").value,
                 fecha_ultima_actualizacion: document.getElementById("fecha_actualizacion").value,
                 nivel_alerta_reposicion: document.getElementById("nivel_alerta").value
             };
-
-            const response = await fetch("http://localhost:5000/api/stocks", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(stockData)
-            });
-
-            if (response.ok) {
-                alert("Stock creado correctamente.");
-                createStockForm.reset();
-            } else {
-                alert("Error al crear stock.");
+    
+            try {
+                const response = await fetch("http://localhost:5000/api/stocks", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(stockData)
+                });
+    
+                if (response.ok) {
+                    alert("Stock creado correctamente.");
+                    createStockForm.reset();
+                    createStockForm.style.display = "none";
+                } else {
+                    alert("Error al crear stock. Verifica los datos e intenta nuevamente.");
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+                alert("Hubo un error al conectar con el servidor.");
             }
         });
     </script>
-</body>
-</html>
+        
+        
+
