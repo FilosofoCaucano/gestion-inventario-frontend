@@ -5,37 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario</title>
     <style>
-        /* Estilos generales del cuerpo */
+        /* Fondo con imagen */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-image: url('ImagenFondoNoSQL.jpg'); /* Cambia 'fondo.jpg' por tu imagen */
-            background-size: cover; /* La imagen cubrirá toda la pantalla */
-            background-repeat: no-repeat; /* Evita que la imagen se repita */
-            background-position: center center; /* Centra la imagen */
+            background-image: url('ImagenFondoNoSQL.jpg'); /* Imagen de fondo */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
             color: #333;
         }
 
-        /* Encabezado */
         h1 {
             text-align: center;
-            color: white; /* Texto blanco para contrastar */
-            text-shadow: 2px 2px 5px black; /* Sombra para mejor visibilidad */
+            color: white; /* Contraste con el fondo */
+            text-shadow: 2px 2px 5px black;
         }
 
-        /* Contenedores de formularios y reportes */
-        form, .reports {
-            background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semi-transparente */
-            padding: 20px;
-            margin: 20px auto;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+        form {
             max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* Fondo semi-transparente */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        /* Etiquetas y campos de entrada */
         label {
             display: block;
             margin-bottom: 8px;
@@ -48,11 +44,10 @@
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box;
         }
 
         button {
-            background-color: #007BFF;
+            background-color: #28a745;
             color: white;
             font-size: 16px;
             cursor: pointer;
@@ -60,89 +55,78 @@
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #218838;
         }
 
-        /* Salida de datos */
-        pre {
-            background-color: #eef;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            overflow-x: auto;
+        .response {
+            text-align: center;
+            color: green;
         }
     </style>
 </head>
 <body>
+    <h1>Agregar Nuevo Producto</h1>
+    <form id="productForm">
+        <label for="nombre">Nombre del Producto:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej. Laptop HP" required>
 
-    <h1>Gestión de Inventario</h1>
+        <label for="descripcion">Descripción:</label>
+        <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Laptop ultraslim" required>
 
-    <!-- Formulario para agregar productos -->
-    <form id="addProductForm">
-        <h2>Agregar Producto</h2>
-        <label for="productName">Nombre del Producto:</label>
-        <input type="text" id="productName" placeholder="Ej. Laptop Dell" required>
+        <label for="numero_serie">Número de Serie:</label>
+        <input type="text" id="numero_serie" name="numero_serie" placeholder="Ej. DELL12345INS" required>
 
-        <label for="productCategory">Categoría:</label>
-        <input type="text" id="productCategory" placeholder="Ej. Electrónicos" required>
+        <label for="categoria">Categoría:</label>
+        <input type="text" id="categoria" name="categoria" placeholder="Ej. Electrónica" required>
 
-        <label for="productStock">Cantidad:</label>
-        <input type="number" id="productStock" placeholder="Ej. 10" required>
+        <label for="precio_unitario">Precio Unitario:</label>
+        <input type="number" id="precio_unitario" name="precio_unitario" placeholder="Ej. 900" required>
 
-        <button type="submit">Guardar Producto</button>
+        <label for="fecha_caducidad">Fecha de Caducidad:</label>
+        <input type="date" id="fecha_caducidad" name="fecha_caducidad" required>
+
+        <label for="proveedor">ID del Proveedor:</label>
+        <input type="text" id="proveedor" name="proveedor" placeholder="Ej. 64876ab12c9d4e1f9a123444" required>
+
+        <button type="submit">Enviar Producto</button>
     </form>
-
-    <!-- Sección para ver reportes -->
-    <div class="reports">
-        <h2>Reportes</h2>
-        <button onclick="fetchInventory()">Ver Inventario</button>
-        <pre id="inventoryOutput">Aquí se mostrará el inventario...</pre>
-    </div>
+    <div class="response" id="responseMessage"></div>
 
     <script>
-        // Función para enviar producto al backend
-        document.getElementById("addProductForm").addEventListener("submit", async (e) => {
+        document.getElementById("productForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            
-            const name = document.getElementById("productName").value;
-            const category = document.getElementById("productCategory").value;
-            const stock = document.getElementById("productStock").value;
+
+            // Captura de datos del formulario
+            const formData = {
+                nombre: document.getElementById("nombre").value,
+                descripcion: document.getElementById("descripcion").value,
+                numero_serie: document.getElementById("numero_serie").value,
+                categoria: document.getElementById("categoria").value,
+                precio_unitario: parseFloat(document.getElementById("precio_unitario").value),
+                fecha_caducidad: document.getElementById("fecha_caducidad").value,
+                proveedor: document.getElementById("proveedor").value,
+            };
 
             try {
                 const response = await fetch("http://localhost:5000/api/products", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        name: name,
-                        category: category,
-                        stock: parseInt(stock)
-                    })
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
                 });
 
                 if (response.ok) {
-                    alert("Producto agregado correctamente.");
-                    document.getElementById("addProductForm").reset();
+                    document.getElementById("responseMessage").innerText = "Producto agregado correctamente.";
+                    document.getElementById("productForm").reset();
                 } else {
-                    alert("Error al agregar el producto.");
+                    document.getElementById("responseMessage").innerText = "Error al agregar el producto.";
                 }
             } catch (error) {
                 console.error("Error al conectar con el backend:", error);
-                alert("No se pudo conectar con el servidor.");
+                document.getElementById("responseMessage").innerText = "No se pudo conectar con el servidor.";
             }
         });
-
-        // Función para obtener el inventario del backend
-        async function fetchInventory() {
-            try {
-                const response = await fetch("http://localhost:5000/api/reports/inventory");
-                const data = await response.json();
-
-                document.getElementById("inventoryOutput").innerText = JSON.stringify(data, null, 2);
-            } catch (error) {
-                console.error("Error al obtener el inventario:", error);
-                alert("No se pudo conectar con el servidor.");
-            }
-        }
     </script>
 </body>
 </html>
