@@ -221,17 +221,16 @@
             productForm.style.display = "block";
             stockForm.style.display = "none";
             createStockForm.style.display = "none";
-        
-            cargarCategorias(); // Asegúrate de tener esta función
-            cargarProveedores(); // Asegúrate de tener esta función
+            cargarCategorias();
+            cargarProveedores();
         });
-        
+    
         // Función para cargar categorías
         async function cargarCategorias() {
             const response = await fetch("http://localhost:5000/api/categories");
             const categorias = await response.json();
             const categoriaSelect = document.getElementById("categoria");
-        
+    
             categoriaSelect.innerHTML = '<option value="">Seleccionar categoría...</option>';
             categorias.forEach(categoria => {
                 const option = document.createElement("option");
@@ -240,39 +239,28 @@
                 categoriaSelect.appendChild(option);
             });
         }
-        
+    
         // Función para cargar proveedores
         async function cargarProveedores() {
             try {
                 const response = await fetch("http://localhost:5000/api/providers");
                 if (!response.ok) throw new Error("Error al obtener proveedores");
-        
+    
                 const proveedores = await response.json();
-                console.log("Proveedores recibidos:", proveedores); // Verifica en consola
-        
                 const proveedorSelect = document.getElementById("proveedor");
                 proveedorSelect.innerHTML = '<option value="">Seleccionar proveedor...</option>';
-        
-                if (proveedores.length === 0) {
-                    alert("No hay proveedores disponibles en este momento.");
-                    return;
-                }
-        
+    
                 proveedores.forEach(proveedor => {
                     const option = document.createElement("option");
-                    option.value = proveedor._id; // ID del proveedor
-                    option.textContent = proveedor.nombre_proveedor || "Proveedor sin nombre"; // Usa nombre_proveedor
+                    option.value = proveedor._id;
+                    option.textContent = proveedor.nombre_proveedor || "Proveedor sin nombre";
                     proveedorSelect.appendChild(option);
                 });
             } catch (error) {
                 console.error("Error al cargar proveedores:", error);
-                alert("No se pudieron cargar los proveedores. Revisa la conexión con el servidor.");
+                alert("No se pudieron cargar los proveedores.");
             }
         }
-        
-        
-        
-        
     
         // Mostrar formulario para reporte de stock
         stockReportBtn.addEventListener("click", () => {
@@ -290,12 +278,12 @@
             cargarTiendas();
         });
     
-        // Obtener lista de productos
+        // Función para cargar productos
         async function cargarProductos() {
             try {
                 const response = await fetch("http://localhost:5000/api/products");
                 if (!response.ok) throw new Error("Error al obtener productos");
-        
+    
                 const productos = await response.json();
                 productoSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
                 productos.forEach(producto => {
@@ -309,9 +297,8 @@
                 alert("No se pudieron cargar los productos.");
             }
         }
-        
     
-        // Obtener lista de tiendas
+        // Función para cargar tiendas
         async function cargarTiendas() {
             const response = await fetch("http://localhost:5000/api/stores");
             const tiendas = await response.json();
@@ -324,105 +311,87 @@
             });
         }
     
-        // Enviar formulario para crear stock
         // Obtener reporte de stock
-stockForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const storeId = document.getElementById("storeId").value;
-
-    if (!storeId) {
-        alert("Por favor, ingresa el ID de la tienda.");
-        return;
-    }
-
-    try {
-        const response = await fetch(`http://localhost:5000/api/stocks?storeId=${storeId}`);
-        if (!response.ok) throw new Error("Error al obtener el reporte de stock");
-
-        const reporteStock = await response.json();
-        console.log("Reporte de stock recibido:", reporteStock);
-
-        // Mostrar los resultados por ahora en consola
-        if (reporteStock.length === 0) {
-            alert("No se encontraron registros de stock para esta tienda.");
-        } else {
-            alert("Reporte de stock cargado correctamente. Ver consola para detalles.");
-            // Llamada para renderizar en tabla si lo deseas
-            mostrarReporteStock(reporteStock);
-        }
-    } catch (error) {
-        console.error("Error al obtener el reporte de stock:", error);
-        alert("No se pudo cargar el reporte de stock. Revisa la conexión al servidor.");
-    }
-});
-
-// Función para renderizar el reporte de stock en consola o tabla (opcional)
-function mostrarReporteStock(reporteStock) {
-    const table = document.createElement("table");
-    table.innerHTML = `
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Fecha de Llegada</th>
-                <th>Última Actualización</th>
-            </tr>
-        </thead>
-        <tbody>
-        ${reporteStock.map(stock => `
-            <tr>
-                <td>${stock.producto || "N/A"}</td>
-                <td>${stock.cantidad_en_stock || "0"}</td>
-                <td>${stock.fecha_llegada || "N/A"}</td>
-                <td>${stock.fecha_ultima_actualizacion || "N/A"}</td>
-            </tr>`).join('')}
-        </tbody>
-    `;
-    stockForm.appendChild(table); // Muestra la tabla debajo del formulario
-}
-
-
-// Enviar formulario para crear stock
-createStockForm.addEventListener("submit", async (e) => {
-    e.preventDefault(); // Evita que se recargue la página
-
-    // Recoge los datos del formulario
-    const stockData = {
-        producto: productoSelect.value,
-        tienda: tiendaSelect.value,
-        cantidad_en_stock: document.getElementById("cantidad").value,
-        fecha_llegada: document.getElementById("fecha_llegada").value,
-        fecha_ultima_actualizacion: document.getElementById("fecha_actualizacion").value,
-        nivel_alerta_reposicion: document.getElementById("nivel_alerta").value
-    };
-
-    console.log("Datos enviados al servidor:", stockData); // Verifica los datos en consola
-
-    try {
-        const response = await fetch("http://localhost:5000/api/stocks", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(stockData)
+        stockForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const storeId = document.getElementById("storeId").value;
+    
+            if (!storeId) {
+                alert("Por favor, ingresa el ID de la tienda.");
+                return;
+            }
+    
+            try {
+                const response = await fetch(`http://localhost:5000/api/stocks?storeId=${storeId}`);
+                if (!response.ok) throw new Error("Error al obtener el reporte de stock");
+    
+                const reporteStock = await response.json();
+                mostrarReporteStock(reporteStock);
+            } catch (error) {
+                console.error("Error al obtener el reporte de stock:", error);
+                alert("No se pudo cargar el reporte de stock.");
+            }
         });
-
-        if (response.ok) {
-            alert("Stock creado correctamente.");
-            createStockForm.reset(); // Limpia el formulario
-            createStockForm.style.display = "none"; // Oculta el formulario
-        } else {
-            const errorData = await response.json();
-            console.error("Error en la respuesta del servidor:", errorData);
-            alert("Error al crear stock: " + (errorData.message || "Error desconocido"));
+    
+        // Función para renderizar reporte de stock en tabla
+        function mostrarReporteStock(reporteStock) {
+            const table = document.createElement("table");
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${reporteStock.map(stock => `
+                        <tr>
+                            <td>${stock.nombre || "N/A"}</td>
+                            <td>${stock.cantidad_en_stock || 0}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+    
+            // Limpiar y mostrar la tabla debajo del formulario
+            stockForm.insertAdjacentElement("afterend", table);
         }
-    } catch (error) {
-        console.error("Error al conectar con el servidor:", error);
-        alert("Hubo un problema al enviar los datos. Revisa la conexión al servidor.");
-    }
-});
-
-
+    
+        // Enviar formulario para crear stock
+        createStockForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+    
+            const stockData = {
+                producto: productoSelect.value,
+                tienda: tiendaSelect.value,
+                cantidad_en_stock: document.getElementById("cantidad").value,
+                fecha_llegada: document.getElementById("fecha_llegada").value,
+                fecha_ultima_actualizacion: document.getElementById("fecha_actualizacion").value,
+                nivel_alerta_reposicion: document.getElementById("nivel_alerta").value
+            };
+    
+            try {
+                const response = await fetch("http://localhost:5000/api/stocks", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(stockData)
+                });
+    
+                if (response.ok) {
+                    alert("Stock creado correctamente.");
+                    createStockForm.reset();
+                    createStockForm.style.display = "none";
+                } else {
+                    const errorData = await response.json();
+                    alert("Error al crear stock: " + (errorData.message || "Error desconocido"));
+                }
+            } catch (error) {
+                console.error("Error al enviar los datos:", error);
+                alert("Hubo un problema al conectar con el servidor.");
+            }
+        });
     </script>
+    
         
         
 
