@@ -248,20 +248,28 @@
                 if (!response.ok) throw new Error("Error al obtener proveedores");
         
                 const proveedores = await response.json();
-                const proveedorSelect = document.getElementById("proveedor");
+                console.log("Proveedores recibidos:", proveedores); // Agrega esto para depurar
         
+                const proveedorSelect = document.getElementById("proveedor");
                 proveedorSelect.innerHTML = '<option value="">Seleccionar proveedor...</option>';
+        
+                if (proveedores.length === 0) {
+                    alert("No hay proveedores disponibles en este momento.");
+                    return;
+                }
+        
                 proveedores.forEach(proveedor => {
                     const option = document.createElement("option");
-                    option.value = proveedor._id; // ID del proveedor
-                    option.textContent = proveedor.nombre; // Nombre visible
+                    option.value = proveedor._id || proveedor.id; // Manejo flexible del ID
+                    option.textContent = proveedor.nombre || "Proveedor sin nombre"; // Evita que quede vacío
                     proveedorSelect.appendChild(option);
                 });
             } catch (error) {
                 console.error("Error al cargar proveedores:", error);
-                alert("No se pudieron cargar los proveedores.");
+                alert("No se pudieron cargar los proveedores. Revisa la conexión con el servidor.");
             }
         }
+        
         
         
     
@@ -316,36 +324,63 @@
         }
     
         // Enviar formulario para crear stock
-        createStockForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const stockData = {
-                producto: productoSelect.value,
-                tienda: tiendaSelect.value,
-                cantidad_en_stock: document.getElementById("cantidad").value,
-                fecha_llegada: document.getElementById("fecha_llegada").value,
-                fecha_ultima_actualizacion: document.getElementById("fecha_actualizacion").value,
-                nivel_alerta_reposicion: document.getElementById("nivel_alerta").value
-            };
-    
-            try {
-                const response = await fetch("http://localhost:5000/api/stocks", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(stockData)
-                });
-    
-                if (response.ok) {
-                    alert("Stock creado correctamente.");
-                    createStockForm.reset();
-                    createStockForm.style.display = "none";
-                } else {
-                    alert("Error al crear stock. Verifica los datos e intenta nuevamente.");
-                }
-            } catch (error) {
-                console.error("Error en la solicitud:", error);
-                alert("Hubo un error al conectar con el servidor.");
-            }
-        });
+        // Obtener reporte de stock
+stockForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const storeId = document.getElementById("storeId").value;
+
+    if (!storeId) {
+        alert("Por favor, ingresa el ID de la tienda.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:5000/api/stocks?storeId=${storeId}`);
+        if (!response.ok) throw new Error("Error al obtener el reporte de stock");
+
+        const reporteStock = await response.json();
+        console.log("Reporte de stock recibido:", reporteStock);
+
+        // Mostrar los resultados por ahora en consola
+        if (reporteStock.length === 0) {
+            alert("No se encontraron registros de stock para esta tienda.");
+        } else {
+            alert("Reporte de stock cargado correctamente. Ver consola para detalles.");
+            // Llamada para renderizar en tabla si lo deseas
+            mostrarReporteStock(reporteStock);
+        }
+    } catch (error) {
+        console.error("Error al obtener el reporte de stock:", error);
+        alert("No se pudo cargar el reporte de stock. Revisa la conexión al servidor.");
+    }
+});
+
+// Función para renderizar el reporte de stock en consola o tabla (opcional)
+function mostrarReporteStock(reporteStock) {
+    const table = document.createElement("table");
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Fecha de Llegada</th>
+                <th>Última Actualización</th>
+            </tr>
+        </thead>
+        <tbody>
+        ${reporteStock.map(stock => `
+            <tr>
+                <td>${stock.producto || "N/A"}</td>
+                <td>${stock.cantidad_en_stock || "0"}</td>
+                <td>${stock.fecha_llegada || "N/A"}</td>
+                <td>${stock.fecha_ultima_actualizacion || "N/A"}</td>
+            </tr>`).join('')}
+        </tbody>
+    `;
+    stockForm.appendChild(table); // Muestra la tabla debajo del formulario
+}
+
     </script>
         
         
