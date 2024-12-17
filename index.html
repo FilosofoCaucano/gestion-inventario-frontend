@@ -221,7 +221,41 @@
             productForm.style.display = "block";
             stockForm.style.display = "none";
             createStockForm.style.display = "none";
+        
+            cargarCategorias(); // Asegúrate de tener esta función
+            cargarProveedores(); // Asegúrate de tener esta función
         });
+        
+        // Función para cargar categorías
+        async function cargarCategorias() {
+            const response = await fetch("http://localhost:5000/api/categories");
+            const categorias = await response.json();
+            const categoriaSelect = document.getElementById("categoria");
+        
+            categoriaSelect.innerHTML = '<option value="">Seleccionar categoría...</option>';
+            categorias.forEach(categoria => {
+                const option = document.createElement("option");
+                option.value = categoria._id;
+                option.textContent = categoria.nombre;
+                categoriaSelect.appendChild(option);
+            });
+        }
+        
+        // Función para cargar proveedores
+        async function cargarProveedores() {
+            const response = await fetch("http://localhost:5000/api/proveedores");
+            const proveedores = await response.json();
+            const proveedorSelect = document.getElementById("proveedor");
+        
+            proveedorSelect.innerHTML = '<option value="">Seleccionar proveedor...</option>';
+            proveedores.forEach(proveedor => {
+                const option = document.createElement("option");
+                option.value = proveedor._id;
+                option.textContent = proveedor.nombre;
+                proveedorSelect.appendChild(option);
+            });
+        }
+        
     
         // Mostrar formulario para reporte de stock
         stockReportBtn.addEventListener("click", () => {
