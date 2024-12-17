@@ -382,6 +382,46 @@ function mostrarReporteStock(reporteStock) {
     stockForm.appendChild(table); // Muestra la tabla debajo del formulario
 }
 
+
+// Enviar formulario para crear stock
+createStockForm.addEventListener("submit", async (e) => {
+    e.preventDefault(); // Evita que se recargue la página
+
+    // Recoge los datos del formulario
+    const stockData = {
+        producto: productoSelect.value,
+        tienda: tiendaSelect.value,
+        cantidad_en_stock: document.getElementById("cantidad").value,
+        fecha_llegada: document.getElementById("fecha_llegada").value,
+        fecha_ultima_actualizacion: document.getElementById("fecha_actualizacion").value,
+        nivel_alerta_reposicion: document.getElementById("nivel_alerta").value
+    };
+
+    console.log("Datos enviados al servidor:", stockData); // Verifica los datos en consola
+
+    try {
+        const response = await fetch("http://localhost:5000/api/stocks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(stockData)
+        });
+
+        if (response.ok) {
+            alert("Stock creado correctamente.");
+            createStockForm.reset(); // Limpia el formulario
+            createStockForm.style.display = "none"; // Oculta el formulario
+        } else {
+            const errorData = await response.json();
+            console.error("Error en la respuesta del servidor:", errorData);
+            alert("Error al crear stock: " + (errorData.message || "Error desconocido"));
+        }
+    } catch (error) {
+        console.error("Error al conectar con el servidor:", error);
+        alert("Hubo un problema al enviar los datos. Revisa la conexión al servidor.");
+    }
+});
+
+
     </script>
         
         
