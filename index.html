@@ -6,43 +6,78 @@
     <title>Gestión de Inventario</title>
     <!-- Fuente decorativa antigua desde Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Fondo y estilo general */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-image: url('ImagenFondoNoSQL.jpg'); /* Imagen de fondo */
+            background-image: url('ImagenFondoNoSQL.jpg');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
             color: #333;
         }
 
-        /* Estilo del título */
+        /* Estilo del título con botones dentro */
         .titulo {
             text-align: center;
-            font-family: 'Cinzel', serif; /* Fuente antigua */
-            background-color: white; /* Fondo blanco */
-            color: #333; /* Texto oscuro */
-            padding: 10px 20px;
+            font-family: 'Cinzel', serif;
+            background-color: white;
+            color: #333;
+            padding: 20px;
             margin: 20px auto;
             border-radius: 8px;
-            width: fit-content;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             font-size: 32px;
             letter-spacing: 2px;
             font-weight: bold;
+            max-width: 600px;
+            position: relative;
         }
 
-        /* Estilo del formulario */
+        .botones-titulo {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* Espacio entre botones */
+        }
+
+        .botones-titulo .button {
+            background-color: #8B5E3C;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .botones-titulo .button i {
+            margin-right: 8px;
+        }
+
+        .botones-titulo .button:hover {
+            background-color: #6A452E;
+        }
+
+        /* Formulario */
         form {
-            max-width: 500px;
-            margin: 40px auto;
+            display: none; /* Oculto por defecto */
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.95);
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            margin: 20px auto;
         }
 
         label {
@@ -60,129 +95,135 @@
             box-sizing: border-box;
         }
 
-        button {
-            background-color: #28a745;
+        table {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #8B5E3C;
             color: white;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-        }
-
-        button:hover {
-            background-color: #218838;
-        }
-
-        .response {
-            text-align: center;
-            color: green;
-            margin-top: 15px;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1 class="titulo">Agregar Nuevo Producto</h1>
+    <!-- Título con botones incluidos -->
+    <div class="titulo">
+        GESTIÓN DE INVENTARIO
+        <div class="botones-titulo">
+            <button id="addProductBtn" class="button">
+                <i class="fas fa-plus"></i> Agregar Nuevo Producto
+            </button>
+            <button id="stockReportBtn" class="button">
+                <i class="fas fa-search"></i> Obtener Reporte de Stock
+            </button>
+        </div>
+    </div>
+
+    <!-- Formulario completo para agregar productos -->
     <form id="productForm">
         <label for="nombre">Nombre del Producto:</label>
-        <input type="text" id="nombre" name="nombre" placeholder="Ej. Laptop HP" required>
+        <input type="text" id="nombre" placeholder="Ej. Laptop HP" required>
 
         <label for="descripcion">Descripción:</label>
-        <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Laptop ultraslim" required>
+        <input type="text" id="descripcion" placeholder="Ej. Laptop ultraslim" required>
 
         <label for="numero_serie">Número de Serie:</label>
-        <input type="text" id="numero_serie" name="numero_serie" placeholder="Ej. DELL12345INS" required>
+        <input type="text" id="numero_serie" placeholder="Ej. DELL12345INS" required>
 
-        <!-- Lista desplegable para Categoría -->
         <label for="categoria">Categoría:</label>
-        <select id="categoria" name="categoria" required>
+        <select id="categoria" required>
             <option value="">Cargando categorías...</option>
         </select>
 
         <label for="precio_unitario">Precio Unitario:</label>
-        <input type="number" id="precio_unitario" name="precio_unitario" placeholder="Ej. 900" required>
+        <input type="number" id="precio_unitario" placeholder="Ej. 900" required>
 
         <label for="fecha_caducidad">Fecha de Caducidad:</label>
-        <input type="date" id="fecha_caducidad" name="fecha_caducidad" required>
+        <input type="date" id="fecha_caducidad" required>
 
-        <!-- Lista desplegable para Proveedor -->
         <label for="proveedor">Proveedor:</label>
-        <select id="proveedor" name="proveedor" required>
+        <select id="proveedor" required>
             <option value="">Cargando proveedores...</option>
         </select>
 
-        <button type="submit">Enviar Producto</button>
+        <button type="submit" class="button">
+            <i class="fas fa-paper-plane"></i> Enviar Producto
+        </button>
     </form>
 
-    <div class="response" id="responseMessage"></div>
+    <!-- Formulario para obtener el reporte de stock -->
+    <form id="stockForm">
+        <label for="storeId">ID de la Tienda:</label>
+        <input type="text" id="storeId" placeholder="Ej. 6743a921408b0f4a5d90df16" required>
+        <button type="submit" class="button">
+            <i class="fas fa-search"></i> Obtener Reporte
+        </button>
+    </form>
+
+    <!-- Tabla de resultados -->
+    <table id="stockTable">
+        <thead>
+            <tr>
+                <th>Nombre del Producto</th>
+                <th>Cantidad en Stock</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
     <script>
-        // Cargar categorías desde la API
-        document.addEventListener("DOMContentLoaded", async () => {
-            const categoriaSelect = document.getElementById("categoria");
-            const proveedorSelect = document.getElementById("proveedor");
+        const addProductBtn = document.getElementById("addProductBtn");
+        const stockReportBtn = document.getElementById("stockReportBtn");
+        const productForm = document.getElementById("productForm");
+        const stockForm = document.getElementById("stockForm");
+        const stockTable = document.getElementById("stockTable");
+        const stockTableBody = stockTable.querySelector("tbody");
 
-            try {
-                // Fetch de categorías
-                const categoriesResponse = await fetch("http://localhost:5000/api/categories");
-                const categories = await categoriesResponse.json();
-
-                // Limpiar opciones anteriores y agregar nuevas categorías
-                categoriaSelect.innerHTML = '<option value="">Seleccione una categoría</option>';
-                categories.forEach(category => {
-                    const option = document.createElement("option");
-                    option.value = category._id; // Asignar el ID como valor
-                    option.textContent = category.nombre; // Mostrar el nombre de la categoría
-                    categoriaSelect.appendChild(option);
-                });
-
-                // Fetch de proveedores
-                const providersResponse = await fetch("http://localhost:5000/api/providers");
-                const providers = await providersResponse.json();
-
-                proveedorSelect.innerHTML = '<option value="">Seleccione un proveedor</option>';
-                providers.forEach(provider => {
-                    const option = document.createElement("option");
-                    option.value = provider._id;
-                    option.textContent = provider.nombre_proveedor;
-                    proveedorSelect.appendChild(option);
-                });
-            } catch (error) {
-                console.error("Error al cargar categorías o proveedores:", error);
-                categoriaSelect.innerHTML = '<option value="">Error al cargar categorías</option>';
-                proveedorSelect.innerHTML = '<option value="">Error al cargar proveedores</option>';
-            }
+        // Mostrar formularios alternativos
+        addProductBtn.addEventListener("click", () => {
+            productForm.style.display = "block";
+            stockForm.style.display = "none";
+            stockTable.style.display = "none";
         });
 
-        // Enviar formulario al backend
-        document.getElementById("productForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+        stockReportBtn.addEventListener("click", () => {
+            productForm.style.display = "none";
+            stockForm.style.display = "block";
+            stockTable.style.display = "none";
+        });
 
-            const formData = {
-                nombre: document.getElementById("nombre").value,
-                descripcion: document.getElementById("descripcion").value,
-                numero_serie: document.getElementById("numero_serie").value,
-                categoria: document.getElementById("categoria").value, // ID seleccionado
-                precio_unitario: parseFloat(document.getElementById("precio_unitario").value),
-                fecha_caducidad: document.getElementById("fecha_caducidad").value,
-                proveedor: document.getElementById("proveedor").value
-            };
+        stockForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const storeId = document.getElementById("storeId").value;
 
             try {
-                const response = await fetch("http://localhost:5000/api/products", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData)
+                const response = await fetch(`http://localhost:5000/api/stocks/tienda/${storeId}`);
+                const stockData = await response.json();
+
+                stockTableBody.innerHTML = "";
+                stockData.forEach(item => {
+                    const row = `<tr>
+                        <td>${item.nombre}</td>
+                        <td>${item.cantidad_en_stock}</td>
+                    </tr>`;
+                    stockTableBody.innerHTML += row;
                 });
 
-                if (response.ok) {
-                    document.getElementById("responseMessage").innerText = "Producto agregado correctamente.";
-                    document.getElementById("productForm").reset();
-                } else {
-                    document.getElementById("responseMessage").innerText = "Error al agregar el producto.";
-                }
+                stockTable.style.display = "table";
             } catch (error) {
-                console.error("Error al enviar producto:", error);
-                document.getElementById("responseMessage").innerText = "No se pudo conectar con el servidor.";
+                alert("Error al obtener el reporte. Verifica el ID de la tienda.");
+                console.error(error);
             }
         });
     </script>
