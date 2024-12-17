@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario</title>
     <style>
-        /* Fondo con imagen */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -19,15 +25,14 @@
 
         h1 {
             text-align: center;
-            color: white; /* Contraste con el fondo */
-            text-shadow: 2px 2px 5px black;
+            color: #333;
         }
 
         form {
             max-width: 500px;
             margin: 40px auto;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.9); /* Fondo semi-transparente */
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -38,7 +43,7 @@
             font-weight: bold;
         }
 
-        input, button {
+        input, select, button {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -85,18 +90,46 @@
         <label for="fecha_caducidad">Fecha de Caducidad:</label>
         <input type="date" id="fecha_caducidad" name="fecha_caducidad" required>
 
-        <label for="proveedor">ID del Proveedor:</label>
-        <input type="text" id="proveedor" name="proveedor" placeholder="Ej. 64876ab12c9d4e1f9a123444" required>
+        <label for="proveedor">Proveedor:</label>
+        <!-- Lista desplegable para seleccionar proveedores -->
+        <select id="proveedor" name="proveedor" required>
+            <option value="">Cargando proveedores...</option>
+        </select>
 
         <button type="submit">Enviar Producto</button>
     </form>
+
     <div class="response" id="responseMessage"></div>
 
     <script>
+        // Cargar lista de proveedores al cargar la página
+        document.addEventListener("DOMContentLoaded", async () => {
+            const proveedorSelect = document.getElementById("proveedor");
+
+            try {
+                const response = await fetch("http://localhost:5000/api/providers");
+                const providers = await response.json();
+
+                // Limpiar opciones previas
+                proveedorSelect.innerHTML = '<option value="">Seleccione un proveedor</option>';
+
+                // Crear opciones dinámicas con nombre y _id
+                providers.forEach(provider => {
+                    const option = document.createElement("option");
+                    option.value = provider._id; // El valor será el _id
+                    option.textContent = provider.nombre_proveedor; // Muestra el nombre del proveedor
+                    proveedorSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al cargar proveedores:", error);
+                proveedorSelect.innerHTML = '<option value="">Error al cargar proveedores</option>';
+            }
+        });
+
+        // Enviar el formulario al backend
         document.getElementById("productForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            // Captura de datos del formulario
             const formData = {
                 nombre: document.getElementById("nombre").value,
                 descripcion: document.getElementById("descripcion").value,
@@ -104,7 +137,7 @@
                 categoria: document.getElementById("categoria").value,
                 precio_unitario: parseFloat(document.getElementById("precio_unitario").value),
                 fecha_caducidad: document.getElementById("fecha_caducidad").value,
-                proveedor: document.getElementById("proveedor").value,
+                proveedor: document.getElementById("proveedor").value // ID seleccionado
             };
 
             try {
@@ -123,7 +156,7 @@
                     document.getElementById("responseMessage").innerText = "Error al agregar el producto.";
                 }
             } catch (error) {
-                console.error("Error al conectar con el backend:", error);
+                console.error("Error al enviar producto:", error);
                 document.getElementById("responseMessage").innerText = "No se pudo conectar con el servidor.";
             }
         });
