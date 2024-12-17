@@ -4,24 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario</title>
-    <!-- Fuente decorativa antigua desde Google Fonts -->
+    <!-- Fuente decorativa antigua -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Fondo y estilo general */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             background-image: url('ImagenFondoNoSQL.jpg');
             background-size: cover;
-            background-repeat: no-repeat;
             background-position: center;
             color: #333;
         }
 
-        /* Estilo del título con botones dentro */
+        /* Título */
         .titulo {
             text-align: center;
             font-family: 'Cinzel', serif;
@@ -32,20 +30,18 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             font-size: 32px;
-            letter-spacing: 2px;
-            font-weight: bold;
             max-width: 600px;
-            position: relative;
         }
 
         .botones-titulo {
-            margin-top: 15px;
             display: flex;
             justify-content: center;
-            gap: 10px; /* Espacio entre botones */
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .botones-titulo .button {
+        /* Botones */
+        .button {
             background-color: #8B5E3C;
             color: white;
             font-size: 16px;
@@ -55,23 +51,19 @@
             border-radius: 5px;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .botones-titulo .button i {
+        .button i {
             margin-right: 8px;
         }
 
-        .botones-titulo .button:hover {
+        .button:hover {
             background-color: #6A452E;
         }
 
-        /* Formulario */
+        /* Formularios */
         form {
-            display: none; /* Oculto por defecto */
-            margin-top: 20px;
+            display: none;
             background-color: rgba(255, 255, 255, 0.95);
             padding: 20px;
             border-radius: 8px;
@@ -82,8 +74,8 @@
 
         label {
             display: block;
-            margin-bottom: 8px;
             font-weight: bold;
+            margin-bottom: 8px;
         }
 
         input, select, button {
@@ -92,45 +84,21 @@
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        table {
-            display: none;
-            margin-top: 20px;
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-
-        th {
-            background-color: #8B5E3C;
-            color: white;
         }
     </style>
 </head>
 <body>
-    <!-- Título con botones incluidos -->
+    <!-- Título con botones -->
     <div class="titulo">
         GESTIÓN DE INVENTARIO
         <div class="botones-titulo">
-            <button id="addProductBtn" class="button">
-                <i class="fas fa-plus"></i> Agregar Nuevo Producto
-            </button>
-            <button id="stockReportBtn" class="button">
-                <i class="fas fa-search"></i> Obtener Reporte de Stock
-            </button>
+            <button id="addProductBtn" class="button"><i class="fas fa-plus"></i> Agregar Nuevo Producto</button>
+            <button id="stockReportBtn" class="button"><i class="fas fa-search"></i> Obtener Reporte de Stock</button>
+            <button id="createStockBtn" class="button"><i class="fas fa-box"></i> Crear Stock</button>
         </div>
     </div>
 
-    <!-- Formulario completo para agregar productos -->
+    <!-- Formulario para agregar productos -->
     <form id="productForm">
         <label for="nombre">Nombre del Producto:</label>
         <input type="text" id="nombre" placeholder="Ej. Laptop HP" required>
@@ -157,50 +125,76 @@
             <option value="">Cargando proveedores...</option>
         </select>
 
-        <button type="submit" class="button">
-            <i class="fas fa-paper-plane"></i> Enviar Producto
-        </button>
+        <button type="submit" class="button"><i class="fas fa-paper-plane"></i> Enviar Producto</button>
     </form>
 
-    <!-- Formulario para obtener el reporte de stock -->
+    <!-- Formulario para crear stock -->
+    <form id="createStockForm">
+        <label for="producto">Producto:</label>
+        <select id="producto" required>
+            <option value="">Cargando productos...</option>
+        </select>
+
+        <label for="tienda">Tienda:</label>
+        <select id="tienda" required>
+            <option value="">Cargando tiendas...</option>
+        </select>
+
+        <label for="cantidad">Cantidad en Stock:</label>
+        <input type="number" id="cantidad" placeholder="Ej. 50" required>
+
+        <label for="fecha_llegada">Fecha de Llegada:</label>
+        <input type="datetime-local" id="fecha_llegada" required>
+
+        <label for="fecha_actualizacion">Fecha Última Actualización:</label>
+        <input type="datetime-local" id="fecha_actualizacion" required>
+
+        <label for="nivel_alerta">Nivel de Alerta de Reposición:</label>
+        <input type="number" id="nivel_alerta" placeholder="Ej. 10" required>
+
+        <button type="submit" class="button"><i class="fas fa-paper-plane"></i> Crear Stock</button>
+    </form>
+
+    <!-- Formulario para reporte de stock -->
     <form id="stockForm">
         <label for="storeId">ID de la Tienda:</label>
         <input type="text" id="storeId" placeholder="Ej. 6743a921408b0f4a5d90df16" required>
-        <button type="submit" class="button">
-            <i class="fas fa-search"></i> Obtener Reporte
-        </button>
+        <button type="submit" class="button"><i class="fas fa-search"></i> Obtener Reporte</button>
     </form>
 
-    <!-- Tabla de resultados -->
-    <table id="stockTable">
-        <thead>
-            <tr>
-                <th>Nombre del Producto</th>
-                <th>Cantidad en Stock</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <!-- Tabla dinámica -->
+    <div id="stockTableContainer"></div>
 
     <script>
         const addProductBtn = document.getElementById("addProductBtn");
         const stockReportBtn = document.getElementById("stockReportBtn");
+        const createStockBtn = document.getElementById("createStockBtn");
         const productForm = document.getElementById("productForm");
+        const createStockForm = document.getElementById("createStockForm");
         const stockForm = document.getElementById("stockForm");
-        const stockTable = document.getElementById("stockTable");
-        const stockTableBody = stockTable.querySelector("tbody");
+        const stockTableContainer = document.getElementById("stockTableContainer");
 
-        // Mostrar formularios alternativos
         addProductBtn.addEventListener("click", () => {
             productForm.style.display = "block";
+            createStockForm.style.display = "none";
             stockForm.style.display = "none";
-            stockTable.style.display = "none";
+            stockTableContainer.innerHTML = "";
         });
 
         stockReportBtn.addEventListener("click", () => {
             productForm.style.display = "none";
+            createStockForm.style.display = "none";
             stockForm.style.display = "block";
-            stockTable.style.display = "none";
+            stockTableContainer.innerHTML = "";
+        });
+
+        createStockBtn.addEventListener("click", () => {
+            productForm.style.display = "none";
+            createStockForm.style.display = "block";
+            stockForm.style.display = "none";
+            stockTableContainer.innerHTML = "";
+            cargarProductos();
+            cargarTiendas();
         });
 
         stockForm.addEventListener("submit", async (e) => {
@@ -211,19 +205,28 @@
                 const response = await fetch(`http://localhost:5000/api/stocks/tienda/${storeId}`);
                 const stockData = await response.json();
 
-                stockTableBody.innerHTML = "";
+                let tableHTML = `
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th>Nombre del Producto</th>
+                                <th>Cantidad en Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
                 stockData.forEach(item => {
-                    const row = `<tr>
-                        <td>${item.nombre}</td>
-                        <td>${item.cantidad_en_stock}</td>
-                    </tr>`;
-                    stockTableBody.innerHTML += row;
+                    tableHTML += `
+                        <tr>
+                            <td>${item.nombre}</td>
+                            <td>${item.cantidad_en_stock}</td>
+                        </tr>
+                    `;
                 });
-
-                stockTable.style.display = "table";
+                tableHTML += `</tbody></table>`;
+                stockTableContainer.innerHTML = tableHTML;
             } catch (error) {
-                alert("Error al obtener el reporte. Verifica el ID de la tienda.");
-                console.error(error);
+                alert("Error al obtener el reporte de stock.");
             }
         });
     </script>
