@@ -248,7 +248,7 @@
                 if (!response.ok) throw new Error("Error al obtener proveedores");
         
                 const proveedores = await response.json();
-                console.log("Proveedores recibidos:", proveedores); // Agrega esto para depurar
+                console.log("Proveedores recibidos:", proveedores); // Verifica en consola
         
                 const proveedorSelect = document.getElementById("proveedor");
                 proveedorSelect.innerHTML = '<option value="">Seleccionar proveedor...</option>';
@@ -260,8 +260,8 @@
         
                 proveedores.forEach(proveedor => {
                     const option = document.createElement("option");
-                    option.value = proveedor._id || proveedor.id; // Manejo flexible del ID
-                    option.textContent = proveedor.nombre || "Proveedor sin nombre"; // Evita que quede vacío
+                    option.value = proveedor._id; // ID del proveedor
+                    option.textContent = proveedor.nombre_proveedor || "Proveedor sin nombre"; // Usa nombre_proveedor
                     proveedorSelect.appendChild(option);
                 });
             } catch (error) {
@@ -269,6 +269,7 @@
                 alert("No se pudieron cargar los proveedores. Revisa la conexión con el servidor.");
             }
         }
+        
         
         
         
