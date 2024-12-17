@@ -243,18 +243,26 @@
         
         // Función para cargar proveedores
         async function cargarProveedores() {
-            const response = await fetch("http://localhost:5000/api/proveedores");
-            const proveedores = await response.json();
-            const proveedorSelect = document.getElementById("proveedor");
+            try {
+                const response = await fetch("http://localhost:5000/api/providers");
+                if (!response.ok) throw new Error("Error al obtener proveedores");
         
-            proveedorSelect.innerHTML = '<option value="">Seleccionar proveedor...</option>';
-            proveedores.forEach(proveedor => {
-                const option = document.createElement("option");
-                option.value = proveedor._id;
-                option.textContent = proveedor.nombre;
-                proveedorSelect.appendChild(option);
-            });
+                const proveedores = await response.json();
+                const proveedorSelect = document.getElementById("proveedor");
+        
+                proveedorSelect.innerHTML = '<option value="">Seleccionar proveedor...</option>';
+                proveedores.forEach(proveedor => {
+                    const option = document.createElement("option");
+                    option.value = proveedor._id; // ID del proveedor
+                    option.textContent = proveedor.nombre; // Nombre visible
+                    proveedorSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al cargar proveedores:", error);
+                alert("No se pudieron cargar los proveedores.");
+            }
         }
+        
         
     
         // Mostrar formulario para reporte de stock
@@ -275,16 +283,24 @@
     
         // Obtener lista de productos
         async function cargarProductos() {
-            const response = await fetch("http://localhost:5000/api/products");
-            const productos = await response.json();
-            productoSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
-            productos.forEach(producto => {
-                const option = document.createElement("option");
-                option.value = producto._id;
-                option.textContent = producto.nombre;
-                productoSelect.appendChild(option);
-            });
+            try {
+                const response = await fetch("http://localhost:5000/api/products");
+                if (!response.ok) throw new Error("Error al obtener productos");
+        
+                const productos = await response.json();
+                productoSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
+                productos.forEach(producto => {
+                    const option = document.createElement("option");
+                    option.value = producto._id;
+                    option.textContent = producto.nombre;
+                    productoSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+                alert("No se pudieron cargar los productos.");
+            }
         }
+        
     
         // Obtener lista de tiendas
         async function cargarTiendas() {
