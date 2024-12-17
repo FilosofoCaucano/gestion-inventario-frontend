@@ -216,11 +216,17 @@
         const productoSelect = document.getElementById("producto");
         const tiendaSelect = document.getElementById("tienda");
     
+        // Contenedor para el reporte de stock
+        const stockTableContainer = document.createElement("div");
+        stockTableContainer.id = "stockTableContainer";
+        stockForm.insertAdjacentElement("afterend", stockTableContainer);
+    
         // Mostrar formulario para agregar productos
         addProductBtn.addEventListener("click", () => {
             productForm.style.display = "block";
             stockForm.style.display = "none";
             createStockForm.style.display = "none";
+            stockTableContainer.innerHTML = ""; // Limpia la tabla
             cargarCategorias();
             cargarProveedores();
         });
@@ -230,6 +236,7 @@
             stockForm.style.display = "block";
             productForm.style.display = "none";
             createStockForm.style.display = "none";
+            stockTableContainer.innerHTML = ""; // Limpia la tabla
         });
     
         // Mostrar formulario para crear stock
@@ -237,98 +244,9 @@
             createStockForm.style.display = "block";
             productForm.style.display = "none";
             stockForm.style.display = "none";
+            stockTableContainer.innerHTML = ""; // Limpia la tabla
             cargarProductos();
             cargarTiendas();
-        });
-    
-        // Cargar categorías
-        async function cargarCategorias() {
-            try {
-                const response = await fetch("http://localhost:5000/api/categories");
-                const categorias = await response.json();
-                const categoriaSelect = document.getElementById("categoria");
-                categoriaSelect.innerHTML = '<option value="">Seleccionar categoría...</option>';
-                categorias.forEach(cat => {
-                    categoriaSelect.innerHTML += `<option value="${cat._id}">${cat.nombre}</option>`;
-                });
-            } catch (error) {
-                console.error("Error al cargar categorías:", error);
-            }
-        }
-    
-        // Cargar proveedores
-        async function cargarProveedores() {
-            try {
-                const response = await fetch("http://localhost:5000/api/providers");
-                const proveedores = await response.json();
-                const proveedorSelect = document.getElementById("proveedor");
-                proveedorSelect.innerHTML = '<option value="">Seleccionar proveedor...</option>';
-                proveedores.forEach(prov => {
-                    proveedorSelect.innerHTML += `<option value="${prov._id}">${prov.nombre_proveedor}</option>`;
-                });
-            } catch (error) {
-                console.error("Error al cargar proveedores:", error);
-            }
-        }
-    
-        // Cargar productos
-        async function cargarProductos() {
-            try {
-                const response = await fetch("http://localhost:5000/api/products");
-                const productos = await response.json();
-                productoSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
-                productos.forEach(prod => {
-                    productoSelect.innerHTML += `<option value="${prod._id}">${prod.nombre}</option>`;
-                });
-            } catch (error) {
-                console.error("Error al cargar productos:", error);
-            }
-        }
-    
-        // Cargar tiendas
-        async function cargarTiendas() {
-            try {
-                const response = await fetch("http://localhost:5000/api/stores");
-                const tiendas = await response.json();
-                tiendaSelect.innerHTML = '<option value="">Seleccionar tienda...</option>';
-                tiendas.forEach(tienda => {
-                    tiendaSelect.innerHTML += `<option value="${tienda._id}">${tienda.nombre || tienda.nombre_tienda}</option>`;
-                });
-            } catch (error) {
-                console.error("Error al cargar tiendas:", error);
-            }
-        }
-    
-        // Enviar formulario para crear stock
-        createStockForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const stockData = {
-                producto: productoSelect.value,
-                tienda: tiendaSelect.value,
-                cantidad_en_stock: document.getElementById("cantidad").value,
-                fecha_llegada: document.getElementById("fecha_llegada").value,
-                fecha_ultima_actualizacion: document.getElementById("fecha_actualizacion").value,
-                nivel_alerta_reposicion: document.getElementById("nivel_alerta").value
-            };
-    
-            try {
-                const response = await fetch("http://localhost:5000/api/stocks", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(stockData)
-                });
-    
-                if (response.ok) {
-                    alert("Stock creado correctamente.");
-                    createStockForm.reset();
-                    createStockForm.style.display = "none";
-                } else {
-                    alert("Error al crear stock. Verifica los datos.");
-                }
-            } catch (error) {
-                console.error("Error al enviar stock:", error);
-                alert("Error de conexión con el servidor.");
-            }
         });
     
         // Obtener reporte de stock
@@ -338,6 +256,8 @@
     
             try {
                 const response = await fetch(`http://localhost:5000/api/stocks/tienda/${storeId}`);
+                if (!response.ok) throw new Error("Error al obtener el reporte de stock");
+    
                 const reporteStock = await response.json();
                 mostrarReporteStock(reporteStock);
             } catch (error) {
@@ -348,27 +268,36 @@
     
         // Mostrar reporte de stock en tabla
         function mostrarReporteStock(reporteStock) {
-            const stockTable = document.createElement("table");
-            stockTable.innerHTML = `
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad en Stock</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${reporteStock.map(stock => `
-                        <tr>
-                            <td>${stock.nombre}</td>
-                            <td>${stock.cantidad_en_stock}</td>
+            if (reporteStock.length === 0) {
+                stockTableContainer.innerHTML = "<p>No se encontraron registros de stock.</p>";
+                return;
+            }
+    
+            // Crear una tabla dinámica
+            const tableHTML = `
+                <table border="1" style="width: 100%; margin-top: 20px; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="background-color: #8B5E3C; color: white;">
+                            <th style="padding: 10px;">Producto</th>
+                            <th style="padding: 10px;">Cantidad en Stock</th>
                         </tr>
-                    `).join('')}
-                </tbody>
+                    </thead>
+                    <tbody>
+                        ${reporteStock.map(stock => `
+                            <tr>
+                                <td style="padding: 10px;">${stock.nombre}</td>
+                                <td style="padding: 10px;">${stock.cantidad_en_stock}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
             `;
-            // Limpiar y añadir la tabla debajo del formulario
-            stockForm.insertAdjacentElement("afterend", stockTable);
+    
+            // Renderizar la tabla en el contenedor
+            stockTableContainer.innerHTML = tableHTML;
         }
     </script>
+    
     
     
         
