@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Inventario</title>
-    <!-- Fuente decorativa antigua -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
@@ -19,7 +17,6 @@
             color: #333;
         }
 
-        /* Título */
         .titulo {
             text-align: center;
             font-family: 'Cinzel', serif;
@@ -34,13 +31,12 @@
         }
 
         .botones-titulo {
+            margin-top: 15px;
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-top: 15px;
         }
 
-        /* Botones */
         .button {
             background-color: #8B5E3C;
             color: white;
@@ -61,7 +57,6 @@
             background-color: #6A452E;
         }
 
-        /* Formularios */
         form {
             display: none;
             background-color: rgba(255, 255, 255, 0.95);
@@ -128,6 +123,13 @@
         <button type="submit" class="button"><i class="fas fa-paper-plane"></i> Enviar Producto</button>
     </form>
 
+    <!-- Formulario para obtener el reporte de stock -->
+    <form id="stockForm">
+        <label for="storeId">ID de la Tienda:</label>
+        <input type="text" id="storeId" placeholder="Ej. 6743a921408b0f4a5d90df16" required>
+        <button type="submit" class="button"><i class="fas fa-search"></i> Obtener Reporte</button>
+    </form>
+
     <!-- Formulario para crear stock -->
     <form id="createStockForm">
         <label for="producto">Producto:</label>
@@ -141,7 +143,7 @@
         </select>
 
         <label for="cantidad">Cantidad en Stock:</label>
-        <input type="number" id="cantidad" placeholder="Ej. 50" required>
+        <input type="number" id="cantidad" required>
 
         <label for="fecha_llegada">Fecha de Llegada:</label>
         <input type="datetime-local" id="fecha_llegada" required>
@@ -150,83 +152,85 @@
         <input type="datetime-local" id="fecha_actualizacion" required>
 
         <label for="nivel_alerta">Nivel de Alerta de Reposición:</label>
-        <input type="number" id="nivel_alerta" placeholder="Ej. 10" required>
+        <input type="number" id="nivel_alerta" required>
 
         <button type="submit" class="button"><i class="fas fa-paper-plane"></i> Crear Stock</button>
     </form>
-
-    <!-- Formulario para reporte de stock -->
-    <form id="stockForm">
-        <label for="storeId">ID de la Tienda:</label>
-        <input type="text" id="storeId" placeholder="Ej. 6743a921408b0f4a5d90df16" required>
-        <button type="submit" class="button"><i class="fas fa-search"></i> Obtener Reporte</button>
-    </form>
-
-    <!-- Tabla dinámica -->
-    <div id="stockTableContainer"></div>
 
     <script>
         const addProductBtn = document.getElementById("addProductBtn");
         const stockReportBtn = document.getElementById("stockReportBtn");
         const createStockBtn = document.getElementById("createStockBtn");
         const productForm = document.getElementById("productForm");
-        const createStockForm = document.getElementById("createStockForm");
         const stockForm = document.getElementById("stockForm");
-        const stockTableContainer = document.getElementById("stockTableContainer");
+        const createStockForm = document.getElementById("createStockForm");
 
+        // Mostrar formularios alternativos
         addProductBtn.addEventListener("click", () => {
             productForm.style.display = "block";
-            createStockForm.style.display = "none";
             stockForm.style.display = "none";
-            stockTableContainer.innerHTML = "";
+            createStockForm.style.display = "none";
         });
 
         stockReportBtn.addEventListener("click", () => {
             productForm.style.display = "none";
-            createStockForm.style.display = "none";
             stockForm.style.display = "block";
-            stockTableContainer.innerHTML = "";
+            createStockForm.style.display = "none";
         });
 
         createStockBtn.addEventListener("click", () => {
             productForm.style.display = "none";
-            createStockForm.style.display = "block";
             stockForm.style.display = "none";
-            stockTableContainer.innerHTML = "";
+            createStockForm.style.display = "block";
             cargarProductos();
             cargarTiendas();
         });
 
-        stockForm.addEventListener("submit", async (e) => {
+        // Cargar productos
+        async function cargarProductos() {
+            const response = await fetch("http://localhost:5000/api/products");
+            const productos = await response.json();
+            const productoSelect = document.getElementById("producto");
+            productoSelect.innerHTML = '<option value="">Seleccione un producto</option>';
+            productos.forEach(p => {
+                productoSelect.innerHTML += `<option value="${p._id}">${p.nombre}</option>`;
+            });
+        }
+
+        // Cargar tiendas
+        async function cargarTiendas() {
+            const response = await fetch("http://localhost:5000/api/stores");
+            const tiendas = await response.json();
+            const tiendaSelect = document.getElementById("tienda");
+            tiendaSelect.innerHTML = '<option value="">Seleccione una tienda</option>';
+            tiendas.forEach(t => {
+                tiendaSelect.innerHTML += `<option value="${t._id}">${t.nombre || t.nombre_tienda}</option>`;
+            });
+        }
+
+        // Enviar formulario para crear stock
+        createStockForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const storeId = document.getElementById("storeId").value;
+            const stockData = {
+                producto: document.getElementById("producto").value,
+                tienda: document.getElementById("tienda").value,
+                cantidad_en_stock: document.getElementById("cantidad").value,
+                fecha_llegada: document.getElementById("fecha_llegada").value,
+                fecha_ultima_actualizacion: document.getElementById("fecha_actualizacion").value,
+                nivel_alerta_reposicion: document.getElementById("nivel_alerta").value
+            };
 
-            try {
-                const response = await fetch(`http://localhost:5000/api/stocks/tienda/${storeId}`);
-                const stockData = await response.json();
+            const response = await fetch("http://localhost:5000/api/stocks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(stockData)
+            });
 
-                let tableHTML = `
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr>
-                                <th>Nombre del Producto</th>
-                                <th>Cantidad en Stock</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                stockData.forEach(item => {
-                    tableHTML += `
-                        <tr>
-                            <td>${item.nombre}</td>
-                            <td>${item.cantidad_en_stock}</td>
-                        </tr>
-                    `;
-                });
-                tableHTML += `</tbody></table>`;
-                stockTableContainer.innerHTML = tableHTML;
-            } catch (error) {
-                alert("Error al obtener el reporte de stock.");
+            if (response.ok) {
+                alert("Stock creado correctamente.");
+                createStockForm.reset();
+            } else {
+                alert("Error al crear stock.");
             }
         });
     </script>
